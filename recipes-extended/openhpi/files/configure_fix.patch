@@ -1,0 +1,18 @@
+--- a/configure.ac	2012-08-27 15:08:58.000000000 -0300
++++ b/configure.ac	2013-07-31 08:55:00.017653886 -0300
+@@ -277,6 +277,7 @@
+         if test "x$have_sysfs" = "xyes"; then
+             AC_SUBST(SYSFS,sysfs)
+ 	    AC_SUBST(WITH_SYSFS,1)
++	    AC_CHECK_HEADERS([sysfs/libsysfs.h])
+         else
+             OH_CHECK_FAIL(libsysfs,,http://linux-diag.sf.net,
+                 Can not build sysfs support without libsysfs)
+@@ -287,6 +288,7 @@
+     [if test "x$have_sysfs" = "xyes"; then
+             AC_SUBST(SYSFS,sysfs)
+ 	    AC_SUBST(WITH_SYSFS,1)
++	    AC_SUBST(SYSFS_INCLUDE)
+      else
+ 	    AC_SUBST(WITH_SYSFS,0)
+      fi

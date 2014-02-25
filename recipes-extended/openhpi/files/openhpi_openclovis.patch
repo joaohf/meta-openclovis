@@ -1,0 +1,237 @@
+diff -Naur openhpi-3.0.0/plugins/dynamic_simulator/new_sim_file_util.cpp openhpi-3.0.0.oc/plugins/dynamic_simulator/new_sim_file_util.cpp
+--- openhpi-3.0.0/plugins/dynamic_simulator/new_sim_file_util.cpp	2011-10-17 13:57:23.000000000 -0200
++++ openhpi-3.0.0.oc/plugins/dynamic_simulator/new_sim_file_util.cpp	2012-01-10 14:16:29.000000000 -0200
+@@ -118,7 +118,7 @@
+       } else if (cur_token == G_TOKEN_STRING) {
+       	 datafield = g_strdup(m_scanner->value.v_string);
+       } else {
+-         err("Processing parse textbuffer: unknow value type %u", cur_token);
++         err("Processing parse textbuffer: unknown value type %u", cur_token);
+          success = false;
+          break;
+       }
+@@ -129,7 +129,7 @@
+          tmp.Language = ( SaHpiLanguageT ) val;
+       } else if (!strcmp( "DataLength", field )) {
+          tmp.DataLength = val;
+-      } else if (!strcmp( "Data", field )) {
++      } else if ((!strcmp( "Data", field ))&&datafield) {
+          strncpy ((char *) tmp.Data, datafield, SAHPI_MAX_TEXT_BUFFER_LENGTH);
+       } else {
+          err("Processing parse textbuffer: unknown field %s", field);
+diff -Naur openhpi-3.0.0/plugins/dynamic_simulator/new_sim_sensor_threshold.cpp openhpi-3.0.0.oc/plugins/dynamic_simulator/new_sim_sensor_threshold.cpp
+--- openhpi-3.0.0/plugins/dynamic_simulator/new_sim_sensor_threshold.cpp	2011-10-17 13:57:23.000000000 -0200
++++ openhpi-3.0.0.oc/plugins/dynamic_simulator/new_sim_sensor_threshold.cpp	2012-01-10 14:16:25.000000000 -0200
+@@ -478,7 +478,10 @@
+    rv = checkOrdering( tmp );
+    if ( rv != SA_OK )
+       return rv; 
+-   
++
++   // Now check if the threshold changes caused an event
++   CheckThresholdsAndPublishEvents(&tmp);
++
+    // Ok, it seems everything is fine - take the new values    
+    memcpy( &m_thres, &tmp, sizeof(SaHpiSensorThresholdsT));
+ 
+@@ -486,6 +489,183 @@
+ }
+ 
+ 
++void NewSimulatorSensorThreshold::CreateThresholdEvent(SaHpiEventStateT theActualEvent, SaHpiBoolT asserted)
++{
++  NewSimulatorResource *res = Resource();
++  if( !res )
++     {
++       stdlog << "CreateEnableChangeEvent: No resource !\n";
++       return;
++     }
++
++  oh_event *e = (oh_event *)g_malloc0( sizeof( struct oh_event ) );
++  
++  e->event.EventType = SAHPI_ET_SENSOR_ENABLE_CHANGE;
++
++  SaHpiRptEntryT *rptentry = oh_get_resource_by_id( res->Domain()->GetHandler()->rptcache, res->ResourceId() );
++  SaHpiRdrT *rdrentry = oh_get_rdr_by_id( res->Domain()->GetHandler()->rptcache, res->ResourceId(), m_record_id );
++
++  if ( rptentry )
++      e->resource = *rptentry;
++  else
++      e->resource.ResourceCapabilities = 0;
++
++  if ( rdrentry )
++      e->rdrs = g_slist_append(e->rdrs, g_memdup(rdrentry, sizeof(SaHpiRdrT)));
++  else
++      e->rdrs = NULL;
++
++  // Fill the event data
++  e->event.Source    = res->ResourceId();
++  e->event.EventType = SAHPI_ET_SENSOR;
++  
++  if ((theActualEvent & SAHPI_ES_LOWER_MINOR) || (theActualEvent & SAHPI_ES_UPPER_MINOR))
++    e->event.Severity  = SAHPI_MINOR;
++  if ((theActualEvent & SAHPI_ES_LOWER_MAJOR) || (theActualEvent & SAHPI_ES_UPPER_MAJOR))
++    e->event.Severity  = SAHPI_MAJOR;
++  if ((theActualEvent & SAHPI_ES_LOWER_CRIT) || (theActualEvent & SAHPI_ES_UPPER_CRIT))
++    e->event.Severity  = SAHPI_CRITICAL;
++  
++  oh_gettimeofday(&e->event.Timestamp);
++  
++  // sensor enable event
++  SaHpiSensorEventT *se = &e->event.EventDataUnion.SensorEvent;
++  se->SensorNum     = m_sensor_record.Num;
++  se->SensorType    = Type();
++  se->EventCategory = SAHPI_EC_THRESHOLD;
++  se->Assertion     = asserted;  // True if the condition is being raised, False if cleared
++  
++  se->EventState    = theActualEvent;
++  se->OptionalDataPresent = 0;
++
++  // Issue the event
++  stdlog << "NewSimulatorSensorThreshold::CreateThresholdEvent OH_ET_HPI Event threshold resource " << res-> ResourceId() << "\n";
++  res->Domain()->AddHpiEvent( e );
++  
++}
++
++
++SaErrorT NewSimulatorSensorThreshold::CheckThresholdsAndPublishEvents(const SaHpiSensorThresholdsT* thres)
++{
++  // Only generate if the threshold is supported.
++  if (thres->UpMinor.IsSupported) {
++    // Crossing the threshold in both directions (from deasserted to asserted,
++    // and from asserted to deasserted) needs to be handled.
++    
++      if (m_event_data & SAHPI_ES_UPPER_MINOR) { 
++          // See if the threshold is no longer exceeded
++          if (lt(m_read_data,thres->UpMinor)) {
++            CreateThresholdEvent(SAHPI_ES_UPPER_MINOR,SAHPI_FALSE);
++            m_event_data &= ~SAHPI_ES_UPPER_MINOR;
++          }
++          
++        }
++      else {
++        // See if the threshold is exceeded
++        if (gt(m_read_data,thres->UpMinor)) { 
++          CreateThresholdEvent(SAHPI_ES_UPPER_MINOR,SAHPI_TRUE);
++          m_event_data |= SAHPI_ES_UPPER_MINOR;
++          }
++        }
++  }
++ 
++  if (thres->UpMajor.IsSupported) {
++      if (m_event_data & SAHPI_ES_UPPER_MAJOR) { 
++          // See if the threshold is no longer exceeded
++          if (lt(m_read_data,thres->UpMajor)) {
++            CreateThresholdEvent(SAHPI_ES_UPPER_MAJOR,SAHPI_FALSE);
++            m_event_data &= ~SAHPI_ES_UPPER_MAJOR;
++          }
++          
++        }
++      else {
++        // See if the threshold is exceeded
++        if (gt(m_read_data,thres->UpMajor)) { 
++          CreateThresholdEvent(SAHPI_ES_UPPER_MAJOR,SAHPI_TRUE);
++          m_event_data |= SAHPI_ES_UPPER_MAJOR;
++          }
++        }
++  }
++
++  if (thres->UpCritical.IsSupported) {
++      if (m_event_data & SAHPI_ES_UPPER_CRIT) { 
++          // See if the threshold is no longer exceeded
++          if (lt(m_read_data,thres->UpCritical)) {
++            CreateThresholdEvent(SAHPI_ES_UPPER_CRIT,SAHPI_FALSE);
++            m_event_data &= ~SAHPI_ES_UPPER_CRIT;
++          }          
++        }
++      else {
++        // See if the threshold is exceeded
++        if (gt(m_read_data,thres->UpCritical)) { 
++          CreateThresholdEvent(SAHPI_ES_UPPER_CRIT,SAHPI_TRUE);
++          m_event_data |= SAHPI_ES_UPPER_CRIT;
++          }
++        }
++  }
++
++
++  
++  if (thres->LowMinor.IsSupported) {
++    // Crossing the threshold in both directions (from deasserted to asserted,
++    // and from asserted to deasserted) needs to be handled.
++    
++      if (m_event_data & SAHPI_ES_LOWER_MINOR) { 
++          // See if the threshold is no longer exceeded
++          if (lt(m_read_data,thres->LowMinor)) {
++            CreateThresholdEvent(SAHPI_ES_LOWER_MINOR,SAHPI_FALSE);
++            m_event_data &= ~SAHPI_ES_LOWER_MINOR;
++          }
++          
++        }
++      else {
++        // See if the threshold is exceeded
++        if (gt(m_read_data,thres->LowMinor)) { 
++          CreateThresholdEvent(SAHPI_ES_LOWER_MINOR,SAHPI_TRUE);
++          m_event_data |= SAHPI_ES_LOWER_MINOR;
++          }
++        }
++  }
++ 
++  if (thres->LowMajor.IsSupported) {
++      if (m_event_data & SAHPI_ES_LOWER_MAJOR) { 
++          // See if the threshold is no longer exceeded
++          if (lt(m_read_data,thres->LowMajor)) {
++            CreateThresholdEvent(SAHPI_ES_LOWER_MAJOR,SAHPI_FALSE);
++            m_event_data &= ~SAHPI_ES_LOWER_MAJOR;
++          }
++          
++        }
++      else {
++        // See if the threshold is exceeded
++        if (gt(m_read_data,thres->LowMajor)) { 
++          CreateThresholdEvent(SAHPI_ES_LOWER_MAJOR,SAHPI_TRUE);
++          m_event_data |= SAHPI_ES_LOWER_MAJOR;
++          }
++        }
++  }
++
++  if (thres->LowCritical.IsSupported) {
++      if (m_event_data & SAHPI_ES_LOWER_CRIT) { 
++          // See if the threshold is no longer exceeded
++          if (lt(m_read_data,thres->LowCritical)) {
++            CreateThresholdEvent(SAHPI_ES_LOWER_CRIT,SAHPI_FALSE);
++            m_event_data &= ~SAHPI_ES_LOWER_CRIT;
++          }          
++        }
++      else {
++        // See if the threshold is exceeded
++        if (gt(m_read_data,thres->LowCritical)) { 
++          CreateThresholdEvent(SAHPI_ES_LOWER_CRIT,SAHPI_TRUE);
++          m_event_data |= SAHPI_ES_LOWER_CRIT;
++          }
++        }
++  }
++
++  
++  return SA_OK;
++}
++
+ /** 
+  * Check whether the setting of one threshold value is allowed
+  * 
+diff -Naur openhpi-3.0.0/plugins/dynamic_simulator/new_sim_sensor_threshold.h openhpi-3.0.0.oc/plugins/dynamic_simulator/new_sim_sensor_threshold.h
+--- openhpi-3.0.0/plugins/dynamic_simulator/new_sim_sensor_threshold.h	2011-10-17 13:57:23.000000000 -0200
++++ openhpi-3.0.0.oc/plugins/dynamic_simulator/new_sim_sensor_threshold.h	2012-01-10 14:17:33.000000000 -0200
+@@ -73,6 +73,13 @@
+   // create an RDR sensor record
+   virtual bool CreateRdr( SaHpiRptEntryT &resource, SaHpiRdrT &rdr );
+ 
++  // Check to see if changing the thresholds to the passed values
++  // would result in an error.  If so, raise the appropriate event.
++  SaErrorT CheckThresholdsAndPublishEvents(const SaHpiSensorThresholdsT* newThres);
++
++  // Create a threshold event
++  void CreateThresholdEvent(SaHpiEventStateT theActualEvent, SaHpiBoolT asserted);  
++
+   // official hpi functions 
+ 
+   // get sensor data

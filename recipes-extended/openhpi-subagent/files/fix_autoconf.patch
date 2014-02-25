@@ -1,0 +1,38 @@
+diff -Naur openhpi-subagent-2.3.4-orig/acinclude.m4 openhpi-subagent-2.3.4/acinclude.m4
+--- openhpi-subagent-2.3.4-orig/acinclude.m4	2006-09-13 12:41:28.000000000 -0300
++++ openhpi-subagent-2.3.4/acinclude.m4	2013-07-31 15:04:17.634435482 -0300
+@@ -54,9 +54,9 @@
+     ],
+     [
+         have_netsnmp=yes
+-	SNMPFLAGS=`net-snmp-config --cflags | sed -e 's/-Wdeclaration-after-statement//g'`	
+-        SNMPALIBS=`net-snmp-config --agent-libs`
+-	SNMPVERSIONOK=`net-snmp-config --version | awk -F\. '{ \
++	SNMPFLAGS=`${net_snmp_config:-net-snmp-config} --cflags | sed -e 's/-Wdeclaration-after-statement//g'`	
++        SNMPALIBS=`${net_snmp_config:-net-snmp-config} --agent-libs`
++	SNMPVERSIONOK=`${net_snmp_config:-net-snmp-config} --version | awk -F\. '{ \
+ 			if ( $[1] >= 5 ) { \
+   				if ( $[2] > 0 ) print "OK"; \
+  			if ( $[2] == 0) { \
+@@ -65,7 +65,7 @@
+ 		} \
+ 	}'`
+         # the following seems to work... thankfully.
+-        SNMPCONFDIR=`net-snmp-config --configure-options | perl -p -e 's/.*sysconfdir=([\/\w]+).*/\1/'`
++        SNMPCONFDIR=`${net_snmp_config:-net-snmp-config} --configure-options | perl -p -e 's/.*sysconfdir=([\/\w]+).*/\1/'`
+ 	if test "$SNMPVERSIONOK" == "OK"; then
+ 	        AC_MSG_RESULT(yes)
+ 	else
+diff -Naur openhpi-subagent-2.3.4-orig/configure.ac openhpi-subagent-2.3.4/configure.ac
+--- openhpi-subagent-2.3.4-orig/configure.ac	2006-09-13 14:42:54.000000000 -0300
++++ openhpi-subagent-2.3.4/configure.ac	2013-07-31 15:05:54.890438913 -0300
+@@ -95,6 +95,9 @@
+     ],
+     [OH_CHECK_FAIL(libopenhpiutils,openhpiutils-devel)])
+ 
++AC_ARG_WITH(net-snmp-config,
++    [[  --with-net-snmp-config=SCRIPT   run SCRIPT as net-snmp-config]],
++    [net_snmp_config=$withval])
+ 
+ OH_CHECK_NETSNMP
+ 

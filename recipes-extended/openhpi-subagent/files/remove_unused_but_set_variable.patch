@@ -1,0 +1,20 @@
+Index: openhpi-subagent-2.3.4/src/hpiSubagent.c
+===================================================================
+--- openhpi-subagent-2.3.4.orig/src/hpiSubagent.c
++++ openhpi-subagent-2.3.4/src/hpiSubagent.c
+@@ -219,7 +219,6 @@ main (int argc, char **argv)
+ 		SaHpiVersionT	hpiVer;
+ 		SaHpiSessionIdT sessionid;
+                 SaHpiDomainInfoT        domain_info;  		
+-		SaHpiBoolT      run_threaded = TRUE;	
+ 								
+ 	  	pid_t child;
+ 		
+@@ -479,7 +478,6 @@ main (int argc, char **argv)
+ 	env = getenv("OPENHPI_THREADED");
+ 	if ((env == (char *)NULL) || (strcmp(env, "NO") == 0)) {
+                 DEBUGMSGTL ((AGENT, "Running in nonthreaded mode.  Configuring polling mechanism\n"));
+-                run_threaded = SAHPI_FALSE;
+ 		set_run_threaded(FALSE);
+ 		if (init_alarm() != AGENT_ERR_NOERROR) {
+                     snmp_log (LOG_ERR, "Could not initialize polling mechanism. Exiting\n.");

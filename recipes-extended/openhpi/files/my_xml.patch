@@ -1,0 +1,15 @@
+Index: openhpi-3.2.1/plugins/ilo2_ribcl/ilo2_ribcl_xml.c
+===================================================================
+--- openhpi-3.2.1.orig/plugins/ilo2_ribcl/ilo2_ribcl_xml.c
++++ openhpi-3.2.1/plugins/ilo2_ribcl/ilo2_ribcl_xml.c
+@@ -44,8 +44,8 @@
+ #include <ctype.h>
+ #include <errno.h>
+ #include <sys/types.h>
+-#include <libxml/parser.h>
+-#include <libxml/xmlmemory.h>
++#include <libxml2/libxml/parser.h>
++#include <libxml2/libxml/xmlmemory.h>
+ #include <ilo2_ribcl.h>
+ #include <ilo2_ribcl_xml.h>
+ #include <ilo2_ribcl_cmnds.h>

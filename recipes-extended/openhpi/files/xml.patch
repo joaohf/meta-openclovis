@@ -1,0 +1,13 @@
+Index: openhpi-3.2.1/configure.ac
+===================================================================
+--- openhpi-3.2.1.orig/configure.ac
++++ openhpi-3.2.1/configure.ac
+@@ -173,7 +173,7 @@ AC_CHECK_HEADERS([openssl/md2.h openssl/
+ 
+ dnl xml is used for XML-based communication in ilo2_ribcl and oa_soap
+ AC_CHECK_LIB([xml2],[xmlParseMemory],[XML2_LIB=-lxml2],[XML2_LIB=])
+-AC_CHECK_HEADERS([libxml2/libxml/xmlexports.h],[XML2_INCLUDE="-I/usr/include/libxml2"],[XML2_INCLUDE])
++AC_CHECK_HEADERS([libxml/xmlexports.h])
+ AC_SUBST(XML2_LIB)
+ AC_SUBST(XML2_INCLUDE)
+ 

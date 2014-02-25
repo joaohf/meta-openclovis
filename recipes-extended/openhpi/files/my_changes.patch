@@ -1,0 +1,26 @@
+Index: openhpi-3.2.1/plugins/sysfs/Makefile.am
+===================================================================
+--- openhpi-3.2.1.orig/plugins/sysfs/Makefile.am
++++ openhpi-3.2.1/plugins/sysfs/Makefile.am
+@@ -33,7 +33,7 @@ MAINTAINERCLEANFILES 	= Makefile.in
+ 
+ AM_CPPFLAGS = -DG_LOG_DOMAIN=\"sysfs\"
+ 
+-INCLUDES		= @OPENHPI_INCLUDES@  -I/usr/include/sysfs
++INCLUDES		= @OPENHPI_INCLUDES@
+ 
+ pkglib_LTLIBRARIES		= libsysfs2hpi.la
+ 
+Index: openhpi-3.2.1/plugins/sysfs/sysfs2hpi.c
+===================================================================
+--- openhpi-3.2.1.orig/plugins/sysfs/sysfs2hpi.c
++++ openhpi-3.2.1/plugins/sysfs/sysfs2hpi.c
+@@ -18,7 +18,7 @@
+ 
+ #include <stdlib.h>
+ #include <string.h>
+-#include <libsysfs.h>
++#include <sysfs/libsysfs.h>
+ 
+ #include <SaHpi.h>
+ #include <oh_utils.h>

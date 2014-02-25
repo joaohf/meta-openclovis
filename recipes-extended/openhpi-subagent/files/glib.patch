@@ -1,0 +1,21 @@
+Index: openhpi-subagent-2.3.4/src/hpiEventThread.c
+===================================================================
+--- openhpi-subagent-2.3.4.orig/src/hpiEventThread.c
++++ openhpi-subagent-2.3.4/src/hpiEventThread.c
+@@ -178,14 +178,13 @@ int start_event_thread(SaHpiSessionIdT *
+         DEBUGMSGTL ((AGENT, "Attempting to init event"));
+         if (!g_thread_supported()) {
+                 DEBUGMSGTL ((AGENT, "Initializing thread support"));
+-                g_thread_init(NULL);
+         } else {
+                 DEBUGMSGTL ((AGENT, "Already supporting threads"));
+         }
+ 
+-        event_thread = g_thread_create(event_thread_loop,
++        event_thread = g_thread_try_new("event_thread",
++                                        event_thread_loop,
+                                        (gpointer)sessionid, 
+-                                       FALSE, 
+                                        &event_thread_error);
+         
+ 	

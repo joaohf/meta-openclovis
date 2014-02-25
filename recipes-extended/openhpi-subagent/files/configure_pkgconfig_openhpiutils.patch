@@ -1,0 +1,38 @@
+Index: openhpi-subagent-2.3.4/configure.ac
+===================================================================
+--- openhpi-subagent-2.3.4.orig/configure.ac
++++ openhpi-subagent-2.3.4/configure.ac
+@@ -65,14 +65,14 @@ fi
+ 
+ # uncomment the section below when libopenhpiutils
+ # has its own pkgconfig file 'openhpiutils.pc'
+-# HPIUTILS_LIBS=`pkg-config --libs openhpiutils`
+-# if test "x$HPIUTILS_LIBS" = "x"; then
+-#     AC_MSG_ERROR([
+-# *** OpenHpiUtils pkgconfig file wasn't found
+-# *** we can't determine proper build flags without it
+-# *** please check your installation
+-# ])
+-# fi
++HPIUTILS_LIBS=`pkg-config --libs openhpiutils`
++if test "x$HPIUTILS_LIBS" = "x"; then
++     AC_MSG_ERROR([
++ *** OpenHpiUtils pkgconfig file wasn't found
++ *** we can't determine proper build flags without it
++ *** please check your installation
++ ])
++ fi
+ 
+ LIBS=$HPI_LIBS
+ # Checks for libraries
+@@ -90,8 +90,8 @@ AC_CHECK_LIB([openhpiutils], [oh_lookup_
+         have_hpiutils=yes
+ # uncomment the 2 lines below when openhpiutils
+ # has its own pkgconfig file 'openhpiutils.pc'
+-#        HPIUTILS_FLAGS=`pkg-config --cflags openhpiutils`
+-#        HPIUTILS_LIBS=`pkg-config --libs openhpiutils`
++        HPIUTILS_FLAGS=`pkg-config --cflags openhpiutils`
++        HPIUTILS_LIBS=`pkg-config --libs openhpiutils`
+     ],
+     [OH_CHECK_FAIL(libopenhpiutils,openhpiutils-devel)])
+ 
