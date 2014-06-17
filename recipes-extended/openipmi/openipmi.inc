@@ -4,16 +4,22 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=94d55d512a9ba36caa9b7df079bae19f"
 DEPENDS = "openssl popt zlib"
 
-INC_PR = "r0"
+INC_PR = "r1"
 
 inherit autotools gettext update-alternatives
+
+PACKAGECONFIG ??= "net-snmp"
+
+PACKAGECONFIG[net-snmp] = ",--with-ucdsnmp=no,net-snmp"
 
 EXTRA_OECONF = "\
     --prefix=${prefix} \
     --without-python \
-    ${@base_contains("OPENCLOVIS_FEATURES_ENABLE", "snmp", "--with-ucdsnmp=no", "", d)} \
     "
 
 S = "${WORKDIR}/OpenIPMI-${PV}"
 
 PARALLEL_MAKEINST = ""
+
+FILES_${PN} += "/usr/lib/perl5"
+FILES_${PN}-dbg += "/usr/lib/perl5/auto/OpenIPMI/.debug"
