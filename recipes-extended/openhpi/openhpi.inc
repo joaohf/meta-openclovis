@@ -2,13 +2,17 @@ DESCRIPTION = "This is the OpenIPMI library, a library that makes simplifies bui
 SECTION = "console/network"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e3c772a32386888ccb5ae1c0ba95f1a4"
-DEPENDS = "openssl zlib net-snmp sysfsutils"
+DEPENDS = "openssl zlib sysfsutils"
 
-INC_PR = "r0"
+INC_PR = "r1"
 
 inherit autotools gettext update-alternatives
 
-EXTRA_OECONF = "--with-libxml2=${STAGING_LIBDIR}/.. --with-net-snmp-config=${STAGING_BINDIR}/net-snmp-config"
+PACKAGECONFIG ??= "net-snmp"
+
+PACKAGECONFIG[net-snmp] = "--with-net-snmp-config=${STAGING_BINDIR}/net-snmp-config,, net-snmp"
+
+EXTRA_OECONF = "--with-libxml2=${STAGING_LIBDIR}/.."
 
 FILES_${PN} += "${libdir}/${PN}/*"
 
