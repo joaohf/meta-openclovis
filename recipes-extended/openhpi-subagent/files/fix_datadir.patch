@@ -1,0 +1,13 @@
+diff --git a/Makefile.am b/Makefile.am
+index 72fe2c2..667d334 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -51,7 +51,7 @@ SUBDIRS			= src docs
+ 
+ DIST_SUBDIRS = src docs
+ 
+-datadir = $(shell net-snmp-config --prefix)/share/snmp/mibs
++datadir = /usr/share/snmp/mibs/
+ dist_data_DATA = mib/SAI-HPI-SNMP-MIB-B.01.01.mib mib/SAF-TC-MIB.mib
+ 
+ DISTCHECK_CONFIGURE_FLAGS = --with-initdir=prefix
