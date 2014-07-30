@@ -1,12 +1,20 @@
-DESCRIPTION = "This is the OpenIPMI library, a library that makes simplifies building complex IPMI management software."
+DESCRIPTION = "OpenHPI provides an open source implementation of the Service Availability Forum (SAF) Hardware Platform Interface (HPI)."
 SECTION = "console/network"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e3c772a32386888ccb5ae1c0ba95f1a4"
-DEPENDS = "openssl zlib sysfsutils"
+DEPENDS = " \
+    openssl \
+    zlib \
+    sysfsutils \
+    glib-2.0 \
+    util-linux \
+    net-snmp \
+    libxml2 \
+    "
 
 INC_PR = "r1"
 
-inherit autotools gettext update-alternatives
+inherit autotools gettext update-alternatives pkgconfig
 
 PACKAGECONFIG ??= "net-snmp"
 
