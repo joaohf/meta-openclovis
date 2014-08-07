@@ -20,8 +20,6 @@ PACKAGECONFIG ??= "net-snmp"
 
 PACKAGECONFIG[net-snmp] = "--with-net-snmp-config=${STAGING_BINDIR}/net-snmp-config,, net-snmp"
 
-EXTRA_OECONF = "--with-libxml2=${STAGING_LIBDIR}/.."
-
 FILES_${PN} += "${libdir}/${PN}/*"
 
 INSANE_SKIP_${PN} = "dev-so"
