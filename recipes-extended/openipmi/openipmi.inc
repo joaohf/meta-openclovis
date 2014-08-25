@@ -9,17 +9,18 @@ DEPENDS = " \
     ncurses \
     "
 
-INC_PR = "r1"
+INC_PR = "r2"
 
 inherit autotools gettext update-alternatives
 
 PACKAGECONFIG ??= "net-snmp"
 
 PACKAGECONFIG[net-snmp] = ",--with-ucdsnmp=no,net-snmp"
+PACKAGECONFIG[python] = "--with-python,--without-python,python,"
+PACKAGECONFIG[perl] = "--with-perl=${STAGING_BINDIR_NATIVE},--with-perl=no,perl,"
 
 EXTRA_OECONF = "\
     --prefix=${prefix} \
-    --without-python \
     "
 
 S = "${WORKDIR}/OpenIPMI-${PV}"
