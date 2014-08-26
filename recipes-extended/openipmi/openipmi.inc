@@ -7,6 +7,8 @@ DEPENDS = " \
     popt \
     zlib \
     ncurses \
+    glib-2.0 \
+    gdbm \
     "
 
 INC_PR = "r2"
