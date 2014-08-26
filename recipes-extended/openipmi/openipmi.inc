@@ -20,6 +20,7 @@ PACKAGECONFIG ??= "net-snmp"
 PACKAGECONFIG[net-snmp] = ",--with-ucdsnmp=no,net-snmp"
 PACKAGECONFIG[python] = "--with-python,--without-python,python,"
 PACKAGECONFIG[perl] = "--with-perl=${STAGING_BINDIR_NATIVE},--with-perl=no,perl,"
+PACKAGECONFIG[tcl] = "--with-tcl,--without-tcl,tcl,"
 
 EXTRA_OECONF = "\
     --prefix=${prefix} \
