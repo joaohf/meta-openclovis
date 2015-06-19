@@ -1,0 +1,11 @@
+[Unit]
+Description=OpenHPI daemon
+After=syslog.target
+
+[Service]
+Type=oneshot
+ExecStart=@SBINDIR@/openhpid -c @SYSCONFDIR@/openhpi/openhpi.conf
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
