@@ -13,7 +13,7 @@ DEPENDS = " \
 
 INC_PR = "r2"
 
-inherit autotools gettext update-alternatives
+inherit autotools gettext update-alternatives systemd
 
 PACKAGECONFIG ??= "net-snmp"
 
@@ -30,5 +30,16 @@ S = "${WORKDIR}/OpenIPMI-${PV}"
 
 PARALLEL_MAKEINST = ""
 
-FILES_${PN} += "/usr/lib/perl5"
+do_install_append() {
+    install -d ${D}/etc/init.d
+    install -m 755 ${WORKDIR}/openipmi.initscript ${D}/etc/init.d/ipmi
+    install -d ${D}/${systemd_unitdir}/system
+    install -m 644 ${WORKDIR}/openipmi.service ${D}/${systemd_unitdir}/system/ipmi.service
+    sed -i -e 's,@libexecdir@,${libexecdir},g' ${D}/${systemd_unitdir}/system/ipmi.service
+    install -d ${D}/${libexecdir}
+    install -m 755 ${WORKDIR}/openipmi.initscript ${D}${libexecdir}/openipmi-helper
+}
+
+FILES_${PN} += "/usr/lib/perl5 \
+                ${systemd_unitdir}"
 FILES_${PN}-dbg += "/usr/lib/perl5/auto/OpenIPMI/.debug"
