@@ -34,3 +34,7 @@ do_install_append() {
 FILES_${PN} += "${libdir}/${PN}/*"
 
 INSANE_SKIP_${PN} = "dev-so"
+
+RDEPENDS_${PN} += "libgpg-error \
+                   libcap \
+                   libgcrypt"
