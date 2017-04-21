@@ -24,8 +24,8 @@ RDEPENDS_packagegroup-saf-base = "\
     glib-2.0 \
     gdbm \
     tipcutils \
-    ${@base_contains("OPENCLOVIS_FEATURES_ENABLE", "snmp", "packagegroup-saf-snmp", "", d)} \
-    ${@base_contains("OPENCLOVIS_FEATURES_ENABLE", "hpi", "packagegroup-saf-hpi", "", d)} \
+    ${@bb.utils.contains("OPENCLOVIS_FEATURES_ENABLE", "snmp", "packagegroup-saf-snmp", "", d)} \
+    ${@bb.utils.contains("OPENCLOVIS_FEATURES_ENABLE", "hpi", "packagegroup-saf-hpi", "", d)} \
     "
 
 SUMMARY_packagegroup-saf-snmp = "SAF SNMP support"
@@ -40,5 +40,5 @@ DESCRIPTION_packagegroup-saf-hpi = "Packages required to support SAF frameworks 
 RDEPENDS_packagegroup-saf-hpi = "\
     openhpi \
     openipmi \
-    ${@base_contains("OPENCLOVIS_FEATURES_ENABLE", "snmp", "openhpi-subagent", "", d)} \
+    ${@bb.utils.contains("OPENCLOVIS_FEATURES_ENABLE", "snmp", "openhpi-subagent", "", d)} \
     "
